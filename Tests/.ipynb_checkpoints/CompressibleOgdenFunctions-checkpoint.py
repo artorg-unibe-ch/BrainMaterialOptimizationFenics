@@ -67,7 +67,7 @@ def LoadCase(LoadCase, FinalRelativeStretch, RelativeStepSize, Dimensions):
     
     if LoadCase == 'Compression':
         InitialState = 1
-        u_0 = fe.Constant((0, 0, 1E-6))                                             # Little displacement to avoid NaN values
+        u_0 = fe.Constant((0, 0, 1E-3))                                             # Little displacement to avoid NaN values
         u_1 = fe.Expression(('0', '0', '(s-1)*h'), degree=1, s = InitialState, h = Dimensions[2] )        # Displacement imposed
         Dir = fe.Constant((0,0,1))                                                  # Deformation direction
         NumberSteps = FinalRelativeStretch / RelativeStepSize                       # Number of steps
@@ -75,7 +75,7 @@ def LoadCase(LoadCase, FinalRelativeStretch, RelativeStepSize, Dimensions):
         
     elif LoadCase == 'Tension':
         InitialState = 1
-        u_0 = fe.Constant((0, 0, -1E-6))                                            # Little displacement to avoid NaN values
+        u_0 = fe.Constant((0, 0, -1E-3))                                            # Little displacement to avoid NaN values
         u_1 = fe.Expression(('0', '0', '(s-1)*h'), degree=1, s = InitialState, h = Dimensions[2] )        # Displacement imposed
         Dir = fe.Constant((0,0,1))                                                  # Deformation direction
         NumberSteps = FinalRelativeStretch / RelativeStepSize                       # Number of steps
@@ -83,7 +83,7 @@ def LoadCase(LoadCase, FinalRelativeStretch, RelativeStepSize, Dimensions):
         
     elif LoadCase == 'Simple Shear':
         InitialState = 0
-        u_0 = fe.Constant((-1E-6, 0, 0))                                            # Little displacement to avoid NaN values
+        u_0 = fe.Constant((-1E-3, 0, 0))                                            # Little displacement to avoid NaN values
         u_1 = fe.Expression(('s*h', '0', '0'), degree=1, s = InitialState, h = Dimensions[2] )        # Displacement imposed
         Dir = fe.Constant((1,0,0))                                                  # Deformation direction
         NumberSteps = FinalRelativeStretch / RelativeStepSize                       # Number of steps
@@ -439,7 +439,7 @@ def OgdenOptimization(Nu, LoadCases, RelativeWeights, NumberElements, FinalRelat
     print('Final Alpha =', Alpha)
     
     TimeName = open('OptimizationTime.txt', 'a+')
-    TimeName.write('Optimizationime (s): %1.3f\n' % (time.time() - start))
+    TimeName.write('%1.3f\n' % (time.time() - start))
     TimeName.close()
         
     if Plot == True :
