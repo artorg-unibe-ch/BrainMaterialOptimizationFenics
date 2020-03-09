@@ -67,7 +67,8 @@ def LoadCase(LoadCase, FinalRelativeStretch, RelativeStepSize, Dimensions):
     
     if LoadCase == 'Compression':
         InitialState = 1
-        u_0 = fe.Constant((0, 0, 1E-3))                                             # Little displacement to avoid NaN values
+        #u_0 = fe.Constant((0, 0, 1E-3)                                             # Little displacement to avoid NaN values
+        u_0 = fe.Constant((0, 0, 0)                                             # Little displacement to avoid NaN values
         u_1 = fe.Expression(('0', '0', '(s-1)*h'), degree=1, s = InitialState, h = Dimensions[2] )        # Displacement imposed
         Dir = fe.Constant((0,0,1))                                                  # Deformation direction
         NumberSteps = FinalRelativeStretch / RelativeStepSize                       # Number of steps
@@ -75,7 +76,8 @@ def LoadCase(LoadCase, FinalRelativeStretch, RelativeStepSize, Dimensions):
         
     elif LoadCase == 'Tension':
         InitialState = 1
-        u_0 = fe.Constant((0, 0, -1E-3))                                            # Little displacement to avoid NaN values
+        #u_0 = fe.Constant((0, 0, -1E-3))                                            # Little displacement to avoid NaN values
+        u_0 = fe.Constant((0, 0, 0)                                             # Little displacement to avoid NaN values
         u_1 = fe.Expression(('0', '0', '(s-1)*h'), degree=1, s = InitialState, h = Dimensions[2] )        # Displacement imposed
         Dir = fe.Constant((0,0,1))                                                  # Deformation direction
         NumberSteps = FinalRelativeStretch / RelativeStepSize                       # Number of steps
@@ -83,7 +85,8 @@ def LoadCase(LoadCase, FinalRelativeStretch, RelativeStepSize, Dimensions):
         
     elif LoadCase == 'Simple Shear':
         InitialState = 0
-        u_0 = fe.Constant((-1E-3, 0, 0))                                            # Little displacement to avoid NaN values
+        #u_0 = fe.Constant((-1E-3, 0, 0))                                            # Little displacement to avoid NaN values
+        u_0 = fe.Constant((0, 0, 0)                                             # Little displacement to avoid NaN values
         u_1 = fe.Expression(('s*h', '0', '0'), degree=1, s = InitialState, h = Dimensions[2] )        # Displacement imposed
         Dir = fe.Constant((1,0,0))                                                  # Deformation direction
         NumberSteps = FinalRelativeStretch / RelativeStepSize                       # Number of steps
@@ -179,7 +182,7 @@ def SolveProblem(Psi, F, Mesh, V, u, v, du, u_0, u_1, Dimensions, InitialState, 
         ax = fig.add_subplot(1, 1, 1)
     
     # Set the stretch state to initial state
-    StretchState = InitialState
+    StretchState = InitialState+1E-3
     
     # ----------------------------------------------------------------------------
     # Problem Solving
@@ -224,6 +227,9 @@ def SolveProblem(Psi, F, Mesh, V, u, v, du, u_0, u_1, Dimensions, InitialState, 
             ax.legend(loc='upper left', frameon=True, framealpha=1)
             display(fig)
             clear_output(wait=True)
+                          
+        if Step == 0:
+            StretchState = StretchState - 1E-3
 
         # Update the stretch state
         StretchState += DeltaStretch
