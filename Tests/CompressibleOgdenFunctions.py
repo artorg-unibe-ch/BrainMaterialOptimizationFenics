@@ -67,30 +67,29 @@ def LoadCase(LoadCase, FinalRelativeStretch, RelativeStepSize, Dimensions):
     
     if LoadCase == 'Compression':
         InitialState = 1
-        #u_0 = fe.Constant((0, 0, 1E-3)                                             # Little displacement to avoid NaN values
-        u_0 = fe.Constant((0, 0, 0)                                             # Little displacement to avoid NaN values
+        u_0 = fe.Constant((0, 0, 1E-3))                                             # Little displacement to avoid NaN values
         u_1 = fe.Expression(('0', '0', '(s-1)*h'), degree=1, s = InitialState, h = Dimensions[2] )        # Displacement imposed
         Dir = fe.Constant((0,0,1))                                                  # Deformation direction
         NumberSteps = FinalRelativeStretch / RelativeStepSize                       # Number of steps
         DeltaStretch = -RelativeStepSize
-        
+                
     elif LoadCase == 'Tension':
         InitialState = 1
-        #u_0 = fe.Constant((0, 0, -1E-3))                                            # Little displacement to avoid NaN values
-        u_0 = fe.Constant((0, 0, 0)                                             # Little displacement to avoid NaN values
+        u_0 = fe.Constant((-1E-3, 0, 0))                                            # Little displacement to avoid NaN values
         u_1 = fe.Expression(('0', '0', '(s-1)*h'), degree=1, s = InitialState, h = Dimensions[2] )        # Displacement imposed
         Dir = fe.Constant((0,0,1))                                                  # Deformation direction
         NumberSteps = FinalRelativeStretch / RelativeStepSize                       # Number of steps
         DeltaStretch = RelativeStepSize
         
+        
     elif LoadCase == 'Simple Shear':
         InitialState = 0
-        #u_0 = fe.Constant((-1E-3, 0, 0))                                            # Little displacement to avoid NaN values
-        u_0 = fe.Constant((0, 0, 0)                                             # Little displacement to avoid NaN values
+        u_0 = fe.Constant((-1E-3, 0, 0))                                            # Little displacement to avoid NaN values
         u_1 = fe.Expression(('s*h', '0', '0'), degree=1, s = InitialState, h = Dimensions[2] )        # Displacement imposed
         Dir = fe.Constant((1,0,0))                                                  # Deformation direction
         NumberSteps = FinalRelativeStretch / RelativeStepSize                       # Number of steps
         DeltaStretch = RelativeStepSize
+        
         
     else :
         print('Incorrect load case name')
@@ -103,7 +102,7 @@ def LoadCase(LoadCase, FinalRelativeStretch, RelativeStepSize, Dimensions):
 
 
 
-def SolveProblem(Psi, F, Mesh, V, u, v, du, u_0, u_1, Dimensions, InitialState, Normal, Dir, NumberSteps, DeltaStretch, Plot = False):
+def SolveProblem(Psi, Nu, F, Ic, J, Mesh, V, u, v, du, u_0, u_1, Dimensions, InitialState, Normal, Dir, NumberSteps, DeltaStretch, Plot = False):
     
     # ----------------------------------------------------------------------------
     # Subdomains definition and Boundary conditions application
@@ -143,34 +142,59 @@ def SolveProblem(Psi, F, Mesh, V, u, v, du, u_0, u_1, Dimensions, InitialState, 
     bcs = [bcl, bcu]
     
     # ----------------------------------------------------------------------------
-    # Problem Definition
+    # Estimation of the results (only necessary for Ogden)
     # ----------------------------------------------------------------------------
     
-    Pi = Psi * fe.dx
+    # Change constitutive model for Neo-Hookean
+    Mu_NH  = 1.15                         # (kPa)
+    Lambda = 2*Mu_NH*Nu/(1-2*Nu)          # (kPa)
+    Psi_NH = CompressibleNeoHookean(Mu_NH, Lambda, Ic, J)
+    Pi = Psi_NH * fe.dx
     
     # First directional derivative of the potential energy
     Fpi = fe.derivative(Pi,u,v)
 
     # Jacobian of Fpi
     Jac = fe.derivative(Fpi,u,du)
-
+    
     # Define option for the compiler (optional)
     ffc_options = {"optimize": True, \
                    "eliminate_zeros": True, \
                    "precompute_basis_const": True, \
                    "precompute_ip_const": True }
-
+    
     # Define the problem
-    problem = fe.NonlinearVariationalProblem(Fpi, u, bcs, Jac, form_compiler_parameters=ffc_options)
+    Problem = fe.NonlinearVariationalProblem(Fpi, u, bcs, Jac, form_compiler_parameters=ffc_options)
 
     # Define the solver
-    Solver = fe.NonlinearVariationalSolver(problem)
+    Solver = fe.NonlinearVariationalSolver(Problem)
+    
+    # Update boundary condition for non zero displacement
+    u_1.s = InitialState
+
+    # Compute solution and save displacement
+    Solver.solve()
+    
+    # Reformulate the problem with the correct constitutive model
+    Pi = Psi * fe.dx
+
+    # First directional derivative of the potential energy
+    Fpi = fe.derivative(Pi,u,v)
+
+    # Jacobian of Fpi
+    Jac = fe.derivative(Fpi,u,du)
+
+    # Define the problem
+    Problem = fe.NonlinearVariationalProblem(Fpi, u, bcs, Jac, form_compiler_parameters=ffc_options)
+
+    # Define the solver
+    Solver = fe.NonlinearVariationalSolver(Problem)
 
     # Set solver parameters (optional)
-    prm = Solver.parameters
-    prm['nonlinear_solver'] = 'newton'
-    prm['newton_solver']['linear_solver'] = 'cg'             # Conjugate gradient
-    prm['newton_solver']['preconditioner'] = 'icc'           # Incomplete Choleski
+    Prm = Solver.parameters
+    Prm['nonlinear_solver'] = 'newton'
+    Prm['newton_solver']['linear_solver'] = 'cg'             # Conjugate gradient
+    Prm['newton_solver']['preconditioner'] = 'icc'           # Incomplete Choleski    
     
     # Data frame to store values
     cols = ['Stretches','P']
@@ -182,7 +206,7 @@ def SolveProblem(Psi, F, Mesh, V, u, v, du, u_0, u_1, Dimensions, InitialState, 
         ax = fig.add_subplot(1, 1, 1)
     
     # Set the stretch state to initial state
-    StretchState = InitialState+1E-3
+    StretchState = InitialState
     
     # ----------------------------------------------------------------------------
     # Problem Solving
@@ -227,9 +251,6 @@ def SolveProblem(Psi, F, Mesh, V, u, v, du, u_0, u_1, Dimensions, InitialState, 
             ax.legend(loc='upper left', frameon=True, framealpha=1)
             display(fig)
             clear_output(wait=True)
-                          
-        if Step == 0:
-            StretchState = StretchState - 1E-3
 
         # Update the stretch state
         StretchState += DeltaStretch
@@ -268,17 +289,23 @@ def OgdenCostFunction(Parameters, Nu, LoadCases, RelativeWeights, NumberElements
     [Mesh, V, u, du, v, F, J, C, Ic] = Mesh2Invariants(Dimensions, NumberElements)
     
     Mu = Parameters[0]
-    Alpha = Parameters[1]
-    D     = 3*(1-2*Nu)/(Mu*(1+Nu))     # (1/kPa
 
-    Psi = CompressibleOgden(Mu, Alpha, D, C, Ic, J)
+    if len(Parameters) == 2:
+        Alpha = Parameters[1]
+        D     = 3*(1-2*Nu)/(Mu*(1+Nu))     # (1/kPa)
+
+        Psi = CompressibleOgden(Mu, Alpha, D, C, Ic, J)
+    elif len(Parameters) == 1:
+        Lambda = 2*Mu*Nu/(1-2*Nu)          # (kPa)
+        
+        Psi = CompressibleNeoHookean(Mu, Lambda, Ic, J)
         
     if 'Compression' in LoadCases:
         # Load case
-        [u_0, u_1, InitialState, Dir, Normal, NumberSteps, DeltaStretch] = LoadCase('Compression', FinalRelativeStretch, RelativeStepSize, Dimensions)
-
+        [u_0, u_1, InitialState, Dir, Normal, NumberSteps, DeltaStretch] = LoadCase('Compression', FinalRelativeStretch, RelativeStepSize, Dimensions)        
+        
         # Solve
-        df = SolveProblem(Psi, F, Mesh, V, u, v, du, u_0, u_1, Dimensions, InitialState, Normal, Dir, NumberSteps, DeltaStretch)
+        df = SolveProblem(Psi, Nu, F, Ic, J, Mesh, V, u, v, du, u_0, u_1, Dimensions, InitialState, Normal, Dir, NumberSteps, DeltaStretch)
 
         # Interpolation
         FolderPath = os.path.join('/home/msimon/Desktop/SHARED/ScriptsAndData/ExperimentalData/')
@@ -316,7 +343,7 @@ def OgdenCostFunction(Parameters, Nu, LoadCases, RelativeWeights, NumberElements
         [u_0, u_1, InitialState, Dir, Normal, NumberSteps, DeltaStretch] = LoadCase('Tension', FinalRelativeStretch, RelativeStepSize, Dimensions)
 
         # Solve
-        df = SolveProblem(Psi, F, Mesh, V, u, v, du, u_0, u_1, Dimensions, InitialState, Normal, Dir, NumberSteps, DeltaStretch)
+        df = SolveProblem(Psi, Nu, F, Ic, J, Mesh, V, u, v, du, u_0, u_1, Dimensions, InitialState, Normal, Dir, NumberSteps, DeltaStretch)
 
         # Interpolation
         FolderPath = os.path.join('/home/msimon/Desktop/SHARED/ScriptsAndData/ExperimentalData/')
@@ -355,7 +382,7 @@ def OgdenCostFunction(Parameters, Nu, LoadCases, RelativeWeights, NumberElements
         [u_0, u_1, InitialState, Dir, Normal, NumberSteps, DeltaStretch] = LoadCase('Simple Shear', FinalRelativeStretch*2, RelativeStepSize*2, Dimensions)
 
         # Solve
-        df = SolveProblem(Psi, F, Mesh, V, u, v, du, u_0, u_1, Dimensions, InitialState, Normal, Dir, NumberSteps, DeltaStretch)
+        df = SolveProblem(Psi, Nu, F, Ic, J, Mesh, V, u, v, du, u_0, u_1, Dimensions, InitialState, Normal, Dir, NumberSteps, DeltaStretch)
 
         # Interpolation
         FolderPath = os.path.join('/home/msimon/Desktop/SHARED/ScriptsAndData/ExperimentalData/')
@@ -414,8 +441,9 @@ def OgdenCostFunction(Parameters, Nu, LoadCases, RelativeWeights, NumberElements
             
     print('Cost:', np.sum(TotalCost))
     
-    FileName = open(str(NumberElements) + 'ElementsOptimizationResults.txt', 'a+')
-    FileName.write('%.3f %.3f %.3f\n' % (Mu, Alpha, TotalCost))
+    FileName = open(str(NumberElements) + 'ElementsNHOptimizationResults.txt', 'a+')
+#    FileName.write('%.3f %.3f %.3f\n' % (Mu, Alpha, TotalCost))
+    FileName.write('%.3f %.3f %.3f\n' % (Mu, Lambda, TotalCost))
     FileName.close()    
 
     return np.sum(TotalCost)
@@ -427,8 +455,9 @@ def OgdenOptimization(Nu, LoadCases, RelativeWeights, NumberElements, FinalRelat
     # Initialize time tracking
     start = time.time()
     
-    FileName = open(str(NumberElements) + 'ElementsOptimizationResults.txt', 'a+')
-    FileName.write('Mu Alpha TotalCost\n')
+    FileName = open(str(NumberElements) + 'ElementsNHOptimizationResults.txt', 'a+')
+#    FileName.write('Mu Alpha TotalCost\n')
+    FileName.write('Mu Lambda TotalCost\n')
     FileName.close() 
     
     Mu    = 0.66                          # (kPa)
@@ -436,6 +465,10 @@ def OgdenOptimization(Nu, LoadCases, RelativeWeights, NumberElements, FinalRelat
     D     = 3*(1-2*Nu)/(Mu*(1+Nu))        # (1/kPa)
 
     InitialGuess = np.array([Mu, Alpha])
+    
+    # Neo-Hookean (test)
+    Mu    = 1.15                          # (kPa)
+    InitialGuess = np.array([Mu])
 
     
     ResOpt = minimize(OgdenCostFunction, InitialGuess, args = (Nu, LoadCases, RelativeWeights, NumberElements, FinalRelativeStretch, RelativeStepSize, Dimensions), method = 'Nelder-Mead', options={'xatol':1E-1})
@@ -450,7 +483,7 @@ def OgdenOptimization(Nu, LoadCases, RelativeWeights, NumberElements, FinalRelat
         
     if Plot == True :
         
-        df = pd.read_csv(str(NumberElements) + 'ElementsOptimizationResults.txt', sep=' ', decimal='.')
+        df = pd.read_csv(str(NumberElements) + 'ElementsNHOptimizationResults.txt', sep=' ', decimal='.')
             
         plt.rc('figure', figsize=[36,7])
         fig = plt.figure()
