@@ -20,7 +20,7 @@ def main(argv):
 
         # Fixed parameters
         ConstitutiveModels = ['Ogden', 'Neo-Hookean']
-        ConstitutiveModel = ConstitutiveModels[0]
+        ConstitutiveModel = ConstitutiveModels[1]
 
         LoadCases = ['Compression', 'Tension', 'SimpleShear']
         RelativeWeights = [1,1,1]
