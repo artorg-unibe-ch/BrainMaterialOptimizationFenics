@@ -1,0 +1,98 @@
+<?xml version="1.0"?>
+<!DOCTYPE Xdmf SYSTEM "Xdmf.dtd" []>
+<Xdmf Version="3.0" xmlns:xi="http://www.w3.org/2001/XInclude">
+  <Domain>
+    <Grid Name="TimeSeries" GridType="Collection" CollectionType="Temporal">
+      <Grid Name="mesh" GridType="Uniform">
+        <Topology NumberOfElements="48000" TopologyType="Tetrahedron" NodesPerElement="4">
+          <DataItem Dimensions="48000 4" NumberType="UInt" Format="HDF">Compression20Elements.h5:/Mesh/0/mesh/topology</DataItem>
+        </Topology>
+        <Geometry GeometryType="XYZ">
+          <DataItem Dimensions="9261 3" Format="HDF">Compression20Elements.h5:/Mesh/0/mesh/geometry</DataItem>
+        </Geometry>
+        <Time Value="0" />
+        <Attribute Name="Displacement (mm)" AttributeType="Vector" Center="Node">
+          <DataItem Dimensions="9261 3" Format="HDF">Compression20Elements.h5:/VisualisationVector/0</DataItem>
+        </Attribute>
+        <Attribute Name="Nominal stress vector (kPa)" AttributeType="Vector" Center="Node">
+          <DataItem Dimensions="9261 3" Format="HDF">Compression20Elements.h5:/VisualisationVector/1</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid Name="mesh" GridType="Uniform">
+        <Topology NumberOfElements="48000" TopologyType="Tetrahedron" NodesPerElement="4">
+          <DataItem Dimensions="48000 4" NumberType="UInt" Format="HDF">Compression20Elements.h5:/Mesh/2/mesh/topology</DataItem>
+        </Topology>
+        <Geometry GeometryType="XYZ">
+          <DataItem Dimensions="9261 3" Format="HDF">Compression20Elements.h5:/Mesh/2/mesh/geometry</DataItem>
+        </Geometry>
+        <Time Value="1" />
+        <Attribute Name="Displacement (mm)" AttributeType="Vector" Center="Node">
+          <DataItem Dimensions="9261 3" Format="HDF">Compression20Elements.h5:/VisualisationVector/2</DataItem>
+        </Attribute>
+        <Attribute Name="Nominal stress vector (kPa)" AttributeType="Vector" Center="Node">
+          <DataItem Dimensions="9261 3" Format="HDF">Compression20Elements.h5:/VisualisationVector/3</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid Name="mesh" GridType="Uniform">
+        <Topology NumberOfElements="48000" TopologyType="Tetrahedron" NodesPerElement="4">
+          <DataItem Dimensions="48000 4" NumberType="UInt" Format="HDF">Compression20Elements.h5:/Mesh/4/mesh/topology</DataItem>
+        </Topology>
+        <Geometry GeometryType="XYZ">
+          <DataItem Dimensions="9261 3" Format="HDF">Compression20Elements.h5:/Mesh/4/mesh/geometry</DataItem>
+        </Geometry>
+        <Time Value="2" />
+        <Attribute Name="Displacement (mm)" AttributeType="Vector" Center="Node">
+          <DataItem Dimensions="9261 3" Format="HDF">Compression20Elements.h5:/VisualisationVector/4</DataItem>
+        </Attribute>
+        <Attribute Name="Nominal stress vector (kPa)" AttributeType="Vector" Center="Node">
+          <DataItem Dimensions="9261 3" Format="HDF">Compression20Elements.h5:/VisualisationVector/5</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid Name="mesh" GridType="Uniform">
+        <Topology NumberOfElements="48000" TopologyType="Tetrahedron" NodesPerElement="4">
+          <DataItem Dimensions="48000 4" NumberType="UInt" Format="HDF">Compression20Elements.h5:/Mesh/6/mesh/topology</DataItem>
+        </Topology>
+        <Geometry GeometryType="XYZ">
+          <DataItem Dimensions="9261 3" Format="HDF">Compression20Elements.h5:/Mesh/6/mesh/geometry</DataItem>
+        </Geometry>
+        <Time Value="3" />
+        <Attribute Name="Displacement (mm)" AttributeType="Vector" Center="Node">
+          <DataItem Dimensions="9261 3" Format="HDF">Compression20Elements.h5:/VisualisationVector/6</DataItem>
+        </Attribute>
+        <Attribute Name="Nominal stress vector (kPa)" AttributeType="Vector" Center="Node">
+          <DataItem Dimensions="9261 3" Format="HDF">Compression20Elements.h5:/VisualisationVector/7</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid Name="mesh" GridType="Uniform">
+        <Topology NumberOfElements="48000" TopologyType="Tetrahedron" NodesPerElement="4">
+          <DataItem Dimensions="48000 4" NumberType="UInt" Format="HDF">Compression20Elements.h5:/Mesh/8/mesh/topology</DataItem>
+        </Topology>
+        <Geometry GeometryType="XYZ">
+          <DataItem Dimensions="9261 3" Format="HDF">Compression20Elements.h5:/Mesh/8/mesh/geometry</DataItem>
+        </Geometry>
+        <Time Value="4" />
+        <Attribute Name="Displacement (mm)" AttributeType="Vector" Center="Node">
+          <DataItem Dimensions="9261 3" Format="HDF">Compression20Elements.h5:/VisualisationVector/8</DataItem>
+        </Attribute>
+        <Attribute Name="Nominal stress vector (kPa)" AttributeType="Vector" Center="Node">
+          <DataItem Dimensions="9261 3" Format="HDF">Compression20Elements.h5:/VisualisationVector/9</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid Name="mesh" GridType="Uniform">
+        <Topology NumberOfElements="48000" TopologyType="Tetrahedron" NodesPerElement="4">
+          <DataItem Dimensions="48000 4" NumberType="UInt" Format="HDF">Compression20Elements.h5:/Mesh/10/mesh/topology</DataItem>
+        </Topology>
+        <Geometry GeometryType="XYZ">
+          <DataItem Dimensions="9261 3" Format="HDF">Compression20Elements.h5:/Mesh/10/mesh/geometry</DataItem>
+        </Geometry>
+        <Time Value="5" />
+        <Attribute Name="Displacement (mm)" AttributeType="Vector" Center="Node">
+          <DataItem Dimensions="9261 3" Format="HDF">Compression20Elements.h5:/VisualisationVector/10</DataItem>
+        </Attribute>
+        <Attribute Name="Nominal stress vector (kPa)" AttributeType="Vector" Center="Node">
+          <DataItem Dimensions="9261 3" Format="HDF">Compression20Elements.h5:/VisualisationVector/11</DataItem>
+        </Attribute>
+      </Grid>
+    </Grid>
+  </Domain>
+</Xdmf>
