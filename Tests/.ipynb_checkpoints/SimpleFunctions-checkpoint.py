@@ -443,11 +443,11 @@ def Interpolation(LoadCase, DataFrame, FinalRelativeStretch, RelativeStepSize, P
 # Cost Function Definition
 # ----------------------------------------------------------------------------  
 
-def CostFunction(Parameters, ConstitutiveModel, BCsType, NumberElements, LoadCases, RelativeWeights, FinalRelativeStretch, RelativeStepSize, Mesh, V, u, du, v, F, J, C, Ic, Dimensions = [5,5,5], Plot = False):
+def CostFunction(Parameters, ConstitutiveModel, BCsType, NumberElements, LoadCases, RelativeWeights, FinalRelativeStretch, RelativeStepSize, Dimensions = [5,5,5], Plot = False):
 
     # Mesh
-#    [Mesh, V, u, du, v] = MeshDefinition(Dimensions, NumberElements)
-#    [F, J, C, Ic] = Kinematics(u)
+    [Mesh, V, u, du, v] = MeshDefinition(Dimensions, NumberElements)
+    [F, J, C, Ic] = Kinematics(u)
     
     Nu = Parameters[0]
     Mu = Parameters[1]
