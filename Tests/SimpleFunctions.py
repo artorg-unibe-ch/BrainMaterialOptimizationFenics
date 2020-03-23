@@ -404,7 +404,6 @@ def SolveProblem(LoadCase, ConstitutiveModel, BCsType, FinalRelativeStretch, Rel
 # ----------------------------------------------------------------------------
 # Interpolation Definition
 # ----------------------------------------------------------------------------  
-
 def Interpolation(LoadCase, DataFrame, FinalRelativeStretch, RelativeStepSize, Plot = False):
     
     # Experimental Data
