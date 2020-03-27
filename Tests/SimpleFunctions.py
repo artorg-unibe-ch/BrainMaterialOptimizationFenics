@@ -574,7 +574,7 @@ def CostFunction(Parameters, ConstitutiveModel, BCsType, NumberElements, LoadCas
     FileName.write(' %.3f\n' % (TotalCost))    
     FileName.close()    
 
-    return np.sum(TotalCost)
+    return np.sum(TotalCost), 
 
 
 
